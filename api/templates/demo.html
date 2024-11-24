@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Riot Auth</title>
+    <style>
+        .auth-frame {
+            width: 430px;
+            height: 1000px;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <iframe src="https://riot-auth.vercel.app/auth/auto/" class="auth-frame"></iframe>
+    <div id="token"></div>
+    
+    <script>
+        window.addEventListener('message', function(event) {
+            if (event.data.type === 'access_token') {
+                const accessToken = event.data.token;
+                document.getElementById('token').textContent = 'Access Token: ' + accessToken;
+            }
+        });
+    </script>
+</body>
+</html>
