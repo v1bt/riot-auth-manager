@@ -38,6 +38,8 @@ else:
 ```
 ### With iFrame
 [`Check out this demo`](https://riot-auth.vercel.app/demo/)
+
+[`Use for store (Only 'kr')`](https://valstore.vercel.app/)
 ```html
 <!DOCTYPE html>
 <html>
