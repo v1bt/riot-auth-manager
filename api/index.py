@@ -216,7 +216,7 @@ def get_access_token(login_token):
     response1 = session.post('https://auth.riotgames.com/api/v1/login-token', headers=headers1, json=data1)
     
     if response1.status_code != 204:
-        return None, "Login token submission failed"
+        return None, "Login token submission failed", None
 
     headers2 = {
         'Host': 'auth.riotgames.com',
@@ -244,13 +244,15 @@ def get_access_token(login_token):
     response2 = session.post('https://auth.riotgames.com/api/v1/authorization', headers=headers2, json=data2)
     
     if response2.status_code != 200:
-        return None, "Authorization failed"
+        return None, "Authorization failed", None
 
+    cookies = dict(response2.cookies)
+    
     response_data = response2.json()
     if 'response' in response_data and 'parameters' in response_data['response']:
-        return response_data['response']['parameters']['uri'], None
+        return response_data['response']['parameters']['uri'], None, cookies
     
-    return None, "Failed to get access token URI"
+    return None, "Failed to get access token URI", None
 
 current_session_data = None
 
@@ -377,10 +379,18 @@ def fetch_token():
     
     if token_data.get('type') == 'success':
         login_token = token_data['success']['login_token']
-        uri, error = get_access_token(login_token)
+        uri, error, cookies = get_access_token(login_token)
         if error:
             return jsonify({'error': error}), 400
-        token_data['uri'] = uri
+        
+        try:
+            access_token = uri.split('#access_token=')[1].split('&')[0]
+            token_data['access_token'] = access_token
+        except:
+            return jsonify({'error': 'Failed to extract access token'}), 400
+        
+        token_data['cookies'] = cookies
+        token_data.pop('uri', None)
     
     return jsonify(token_data)
     
@@ -391,6 +401,44 @@ def not_found_error(error):
 @app.errorhandler(500)
 def internal_error(error):
     return handle_error(500, "Internal server error")
+
+@app.route('/cookie_reauth', methods=['POST'])
+def cookie_reauth():
+    ssid = request.headers.get('ssid')
+    if not ssid:
+        return jsonify({'error': 'Cookie is required'}), 400
+
+    params = {
+        'redirect_uri': 'https://playvalorant.com/opt_in',
+        'client_id': 'play-valorant-web-prod',
+        'response_type': 'token id_token',
+        'nonce': '1',
+        'scope': 'account openid'
+    }
+
+    try:
+        response = requests.get(
+            'https://auth.riotgames.com/authorize',
+            params=params,
+            cookies={'ssid': ssid},
+            allow_redirects=False
+        )
+
+        location = response.headers.get('Location', '')
+        if 'access_token' not in location:
+            return jsonify({'error': 'Invalid Cookie'}), 401
+
+        fragment = urlparse(location).fragment
+        tokens = parse_qs(fragment)
+        access_token = tokens.get('access_token', [None])[0]
+
+        if not access_token:
+            return jsonify({'error': 'Failed to get access token'}), 500
+
+        return jsonify({'access_token': access_token})
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
