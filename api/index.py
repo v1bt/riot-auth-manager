@@ -390,7 +390,7 @@ def fetch_token():
             return jsonify({'error': 'Failed to extract access token'}), 400
         
         token_data['cookies'] = cookies
-        token_data.pop('uri', None)
+        token_data['uri'] = uri
     
     return jsonify(token_data)
     
