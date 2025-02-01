@@ -157,11 +157,12 @@
             return false;
         }
 
-        function sendTokenToParent(token) {
+        function sendTokenToParent(token, ssid) {
             if (window.self !== window.top) {
                 window.parent.postMessage({
-                    type: 'access_token',
-                    token: token
+                    status: 'success',
+                    token: token,
+                    ssid: ssid
                 }, '*');
             }
         }
@@ -216,11 +217,11 @@
                             clearInterval(tokenCheckTimer);
                             statusEl.textContent = '{{sus}}';
                             
-                            const uri = response.data.uri;
-                            const accessToken = uri.split('#access_token=')[1].split('&')[0];
+                            const accessToken = response.data.access_token;
+                            const ssid = response.data.cookies?.ssid;
                             
                             if (checkIfInIframe()) {
-                                sendTokenToParent(accessToken);
+                                sendTokenToParent(accessToken, ssid);
                             } else {
                                 responseDataEl.style.display = 'block';
                                 responseContentEl.textContent = accessToken;
