@@ -2,7 +2,7 @@
 <table>
 	<tr>
 		<td>
-			Don't forget to hit the star ⭐ button
+			There is currently an error on mobile.⚠️
 		</td>
 	</tr>
 </table>
