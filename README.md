@@ -2,7 +2,7 @@
 <table>
 	<tr>
 		<td>
-			There is currently an error on mobile.⚠️
+			Error fixed
 		</td>
 	</tr>
 </table>
