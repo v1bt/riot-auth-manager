@@ -2,7 +2,7 @@
 <table>
 	<tr>
 		<td>
-			Error fixed
+			Mobile error fixed
 		</td>
 	</tr>
 </table>
