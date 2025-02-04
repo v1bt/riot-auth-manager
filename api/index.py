@@ -8,9 +8,6 @@ import re
 
 app = Flask(__name__)
 
-TOKEN_RETRY_INTERVAL = 2
-QR_REGENERATION_INTERVAL = 60
-
 LANGUAGE_TO_REGION = {
     'en-US': 'NA',
     'ko-KR': 'KR',
@@ -427,5 +424,5 @@ def not_found_error(error):
 def internal_error(error):
     return handle_error(500, "Internal server error")
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+# if __name__ == '__main__':
+#     app.run(host='0.0.0.0', port=5000, debug=True)
