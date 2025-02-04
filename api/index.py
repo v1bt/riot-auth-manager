@@ -258,9 +258,8 @@ current_session_data = None
 
 @app.route('/login_url', methods=['POST'])
 def login_url_route():
-    global current_session_data
-    
     country_code = request.headers.get('country-code')
+    
     if not country_code or country_code.lower() == 'auto':
         accept_language = request.headers.get('Accept-Language', '')
         if ',' in accept_language:
@@ -273,17 +272,13 @@ def login_url_route():
     if error:
         return jsonify({'error': error}), 400
     
-    current_session_data = {
-        'session': result['session'],
-        'sdk_sid': result['sdk_sid'],
-        'country_code': country_code
-    }
-    
     return jsonify({
         'login_url': result['login_url'],
         'cluster': result['cluster'],
         'suuid': result['suuid'],
-        'timestamp': result['timestamp']
+        'timestamp': result['timestamp'],
+        'session_cookies': dict(result['session'].cookies),
+        'sdk_sid': result['sdk_sid']
     })
 
 @app.route('/')
@@ -298,6 +293,8 @@ def demo():
 def after_request(response):
     response.headers.remove('X-Frame-Options')
     response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
     return response
 
 @app.route('/auth/<lang>/')
@@ -350,32 +347,20 @@ def auth(lang):
 
 @app.route('/get_token', methods=['POST'])
 def fetch_token():
-    global current_session_data
+    session_cookies = request.json.get('session_cookies')
+    sdk_sid = request.json.get('sdk_sid')
+    country_code = request.headers.get('country-code', 'en-US')
     
-    if not current_session_data:
-        return jsonify({'error': 'No active session'}), 400
+    if not session_cookies or not sdk_sid:
+        return jsonify({'error': 'Session data required'}), 400
     
-    token_data = get_login_token(
-        current_session_data['session'], 
-        current_session_data['sdk_sid'],
-        current_session_data['country_code']
-    )
+    session = requests.Session()
+    session.cookies.update(session_cookies)
+    
+    token_data = get_login_token(session, sdk_sid, country_code)
     
     if not token_data:
-        new_url, error = login_url(current_session_data['country_code'])
-        if error:
-            return jsonify({'error': error}), 400
-        
-        current_session_data = {
-            'session': new_url['session'],
-            'sdk_sid': new_url['sdk_sid'],
-            'country_code': current_session_data['country_code']
-        }
-        
-        return jsonify({
-            'error': 'Token expired', 
-            'new_url': new_url['login_url']
-        })
+        return jsonify({'error': 'Token expired'})
     
     if token_data.get('type') == 'success':
         login_token = token_data['success']['login_token']
@@ -393,14 +378,7 @@ def fetch_token():
         token_data['uri'] = uri
     
     return jsonify(token_data)
-    
-@app.errorhandler(404)
-def not_found_error(error):
-    return handle_error(404, "Page not found")
 
-@app.errorhandler(500)
-def internal_error(error):
-    return handle_error(500, "Internal server error")
 
 @app.route('/cookie_reauth', methods=['POST'])
 def cookie_reauth():
@@ -439,6 +417,15 @@ def cookie_reauth():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+    
+
+@app.errorhandler(404)
+def not_found_error(error):
+    return handle_error(404, "Page not found")
+
+@app.errorhandler(500)
+def internal_error(error):
+    return handle_error(500, "Internal server error")
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
