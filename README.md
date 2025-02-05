@@ -18,7 +18,7 @@ import urllib.parse
 
 BASE_URL = 'https://riot-auth.vercel.app'
 
-headers = {'country-code': 'en-US'} #This header is optional and can be set to 'auto'.
+headers = {'country-code': 'en-US'} # This header is optional and can be set to 'auto'.
 response = requests.post(f'{BASE_URL}/login_url', headers=headers).json()
 login_url = response.get('login_url')
 
@@ -51,9 +51,10 @@ if token_response.get('type') == 'success':
     print('\nUser Info:', requests.get('https://auth.riotgames.com/userinfo', 
         headers={'Authorization': f'Bearer {token}'}).json())
 
+    print('\nCookies:')
     if 'cookies' in token_response:
-        print('\nssid:', token_response['cookies'].get('ssid', 'No ssid found'))
-	#There are more cookies.
+        for cookie_name, cookie_value in token_response['cookies'].items():
+            print(f'{cookie_name}: {cookie_value}')
     else:
         print('No cookies')
 else:
