@@ -1,4 +1,4 @@
-# Riot QR Auth
+# Riot Auth Manager
 <table>
 	<tr>
 		<td>
