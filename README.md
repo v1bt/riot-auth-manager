@@ -53,6 +53,7 @@ if token_response.get('type') == 'success':
 
     if 'cookies' in token_response:
         print('\nssid:', token_response['cookies'].get('ssid', 'No ssid found'))
+	#There are more cookies.
     else:
         print('No cookies')
 else:
