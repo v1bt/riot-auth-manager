@@ -2,14 +2,6 @@
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fv1bt%2Friot-auth-manager%2F&project-name=riot-auth&repository-name=riot-auth-manager)
 
-<table>
-	<tr>
-		<td>
-			Don't forget to hit the star ⭐ button
-		</td>
-	</tr>
-</table>
-
 An SDK that helps you obtain Riot access tokens via QR authentication.
 
 ## Examples
