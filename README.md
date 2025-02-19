@@ -1,3 +1,8 @@
+> [!warning]
+> No longer managed
+> 
+> Use https://github.com/RiisDev/RadiantConnect
+
 # Riot Auth Manager
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fv1bt%2Friot-auth-manager%2F&project-name=riot-auth&repository-name=riot-auth-manager)
